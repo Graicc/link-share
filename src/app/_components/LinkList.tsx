@@ -4,16 +4,14 @@ import { type Post } from "@prisma/client";
 import { FaSpinner, FaTrash } from "react-icons/fa"; // Import the FontAwesome minus icon
 import { api } from "~/trpc/react";
 
-interface LinkListProps {
-  feedItems: Post[];
-}
-
 export const LinkList = () => {
   const [feedItems, feedItemsQuery] = api.link.getAll.useSuspenseQuery();
   const remove = api.link.remove.useMutation();
   async function removeItem(index: number) {
-    remove.mutate({ id: feedItems[index].id });
-    await utils.link.getAll.invalidate();
+    if (feedItems[index]) {
+      remove.mutate({ id: feedItems[index]?.id });
+      await utils.link.getAll.invalidate();
+    }
   }
 
   const utils = api.useUtils();

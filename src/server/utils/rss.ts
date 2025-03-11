@@ -11,7 +11,7 @@ interface Post {
 export function createRSSFeed(posts: Post[], username: string) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const feed: Feed = new Feed({
-    title: `{username}'s Shared Links`,
+    title: `${username}'s Shared Links`,
     id: `https://share-links.graic.net/feed/${username}`,
     link: `https://share-links.graic.net/feed/${username}`,
     author: {

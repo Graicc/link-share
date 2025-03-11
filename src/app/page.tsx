@@ -22,7 +22,9 @@ export default async function Home() {
           </h1>
           {session ? (
             <div className="flex flex-col items-center gap-4">
-              <CopyableLink url={`${origin}/feed/${session?.user.name}`} />
+              <CopyableLink
+                url={`https://${origin}/feed/${session?.user.name}`}
+              />
               <AddLinkComponent />
               <LinkList />
               <Link

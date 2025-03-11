@@ -1,7 +1,7 @@
 import { z } from "zod";
 import fetch from "node-fetch";
-import { load } from "cheerio"; // Add this import
-import { createRSSFeed } from "~/server/utils/rss"; // Add this import
+import { load } from "cheerio";
+import { createRSSFeed } from "~/server/utils/rss";
 
 import {
   createTRPCRouter,
@@ -9,10 +9,12 @@ import {
   publicProcedure,
 } from "~/server/api/trpc";
 
-// Add this function to extract metadata
-async function extractMetadata(
-  url: string,
-): Promise<{ title?: string; description?: string; image?: string }> {
+async function extractMetadata(url: string): Promise<{
+  title?: string;
+  description?: string;
+  image?: string;
+  url: string;
+}> {
   try {
     const response = await fetch(url, {
       headers: {
@@ -27,8 +29,33 @@ async function extractMetadata(
     const html = await response.text();
     const $ = load(html);
 
-    const metadata: { title?: string; description?: string; image?: string } =
-      {};
+    const metadata: {
+      title?: string;
+      description?: string;
+      image?: string;
+      url: string;
+    } = { url };
+
+    const youtube = /(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/.exec(url);
+    if (youtube && youtube.length > 0) {
+      const videoUrl = `https://youtu.be/${youtube[1]}`;
+      const newUrl = `https://youtube.com/oembed?url=${videoUrl}&format=json`;
+
+      const response = await fetch(newUrl);
+
+      type YouTubeData = {
+        title: string;
+        author_name: string;
+        thumbnail_url: string;
+      };
+      const data = (await response.json()) as YouTubeData;
+
+      metadata.title = data?.title;
+      metadata.description = data?.author_name;
+      metadata.image = data?.thumbnail_url;
+      metadata.url = videoUrl;
+      return metadata;
+    }
 
     metadata.title =
       $('meta[property="og:title"]').attr("content") ??
@@ -66,12 +93,12 @@ export const linkRouter = createTRPCRouter({
         throw new Error("Not authenticated");
       }
 
-      const embedData = await extractMetadata(input.url); // Add this line
+      const embedData = await extractMetadata(input.url);
 
       return ctx.db.post.create({
         data: {
-          name: embedData.title ?? "", // Add this line
-          url: input.url,
+          name: embedData.title ?? "",
+          url: embedData.url,
           title: embedData.title ?? "",
           description: embedData.description ?? "",
           image: embedData.image ?? undefined,

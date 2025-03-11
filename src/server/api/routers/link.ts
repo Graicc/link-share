@@ -77,7 +77,7 @@ async function extractMetadata(url: string): Promise<{
     return metadata;
   } catch (error) {
     console.error("Error extracting metadata:", error);
-    return {};
+    return { url };
   }
 }
 

@@ -13,7 +13,7 @@ export const AddLinkComponent = () => {
   const handleAddLink = async () => {
     if (url) {
       await addLink.mutateAsync({ url });
-      await utils.link.getAll.invalidate();
+      await utils.link.getUserLinks.invalidate();
     }
   };
 

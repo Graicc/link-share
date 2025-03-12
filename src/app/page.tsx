@@ -1,16 +1,14 @@
 import Link from "next/link";
-import { HydrateClient } from "~/trpc/server";
+import { api, HydrateClient } from "~/trpc/server";
 import { auth } from "~/server/auth";
 import { AddLinkComponent } from "~/app/_components/AddLinkComponent";
-import { LinkList } from "~/app/_components/LinkList";
-import CopyableLink from "./_components/CopyableLink";
-import { headers } from "next/headers";
-import { signOut } from "next-auth/react";
+import LinkList from "./_components/LinkList";
 
 export default async function Home() {
   const session = await auth();
 
-  const origin = (await headers()).get("host");
+  const username = session?.user.name ?? "";
+  void api.link.getUserLinks.prefetch({ username });
 
   return (
     <HydrateClient>
@@ -22,11 +20,14 @@ export default async function Home() {
           </h1>
           {session ? (
             <div className="flex flex-col items-center gap-4">
-              <CopyableLink
-                url={`https://${origin}/feed/${session?.user.name}`}
-              />
+              <Link
+                className="text-gray-400 underline"
+                href={`view/${session?.user.name}`}
+              >
+                View Feed
+              </Link>
               <AddLinkComponent />
-              <LinkList />
+              <LinkList username={username} editable={true} />
               <Link
                 href="/api/auth/signout"
                 className="rounded-xl bg-white/10 px-5 py-2 font-semibold no-underline transition hover:bg-white/20"

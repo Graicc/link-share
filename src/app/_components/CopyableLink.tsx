@@ -13,7 +13,7 @@ export default function CopyableLink({ url }: { url: string }) {
   };
 
   return (
-    <button className="localhost:3000/feed/Graic" onClick={copyToClipboard}>
+    <button className="" onClick={copyToClipboard}>
       <span className="text-gray-400 underline">{url}</span>{" "}
       {selected ? (
         <FaCheck className="inline" />

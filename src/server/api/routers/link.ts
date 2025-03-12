@@ -122,19 +122,6 @@ export const linkRouter = createTRPCRouter({
         },
       });
     }),
-  getAll: protectedProcedure.query(async ({ ctx }) => {
-    if (!ctx.session?.user?.id) {
-      throw new Error("Not authenticated");
-    }
-    return ctx.db.post.findMany({
-      where: {
-        createdById: ctx.session.user.id,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-  }),
   getRSSFeed: publicProcedure
     .input(
       z.object({
@@ -167,5 +154,31 @@ export const linkRouter = createTRPCRouter({
         image: post.image ?? undefined,
       }));
       return createRSSFeed(formattedPosts, input.username); // Update this line
+    }),
+  getUserLinks: publicProcedure
+    .input(
+      z.object({
+        username: z.string(),
+      }),
+    )
+    .query(async ({ input, ctx }) => {
+      const user = await ctx.db.user.findFirst({
+        where: {
+          name: input.username,
+        },
+      });
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      return ctx.db.post.findMany({
+        where: {
+          createdById: user.id,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
     }),
 });

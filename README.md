@@ -1,3 +1,6 @@
+> [!CAUTION]
+> Link Share has been replaced by [Link Share Forever](https://github.com/graicc/link-share-forever) to support long term (i.e. 10+ year) availability. 
+
 # Link Share
 
 Share links with your friends with RSS.
